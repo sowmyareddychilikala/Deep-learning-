@@ -1,0 +1,757 @@
+
+# Program 1: Vector operations for robot navigation
+
+import numpy as np
+
+position = np.array([2.0, 3.0, 1.0])
+velocity = np.array([0.5, -1.0, 0.2])
+time = 4.0
+
+displacement = time * velocity
+print("Displacement (velocity x time):", displacement)
+
+new_position = position + displacement
+print("New position (position + displacement):", new_position)
+
+target = np.array([10.0, 0.0, 5.0])
+offset_to_target = target - new_position
+print("Offset from robot to target (target - new position):", offset_to_target)
+
+distance_to_target = np.linalg.norm(offset_to_target)
+print("Distance to target:", round(distance_to_target, 3), "m")
+     
+Displacement (velocity x time): [ 2.  -4.   0.8]
+New position (position + displacement): [ 4.  -1.   1.8]
+Offset from robot to target (target - new position): [6.  1.  3.2]
+Distance to target: 6.873 m
+
+# Program 2: Matrix operations for image transformation
+
+import numpy as np
+
+points = np.array([[0, 4, 4, 0],
+                   [0, 0, 3, 3]])
+
+theta = np.radians(90)
+rotation = np.array([[np.cos(theta), -np.sin(theta)],
+                     [np.sin(theta),  np.cos(theta)]])
+
+scale = np.array([[2, 0],
+                  [0, 1]])
+
+combined = scale @ rotation
+transformed = combined @ points
+print("Transformation matrix (scale @ rotation):\n", np.round(combined, 3))
+print("Transformed coordinates:\n", np.round(transformed, 3))
+
+transpose_points = points.T
+print("Transpose of coordinates:\n", transpose_points)
+
+product_transpose = (combined @ points).T
+rule_check = points.T @ combined.T
+print("(AB)^T equals B^T A^T:", np.allclose(product_transpose, rule_check))
+
+det = np.linalg.det(combined)
+print("Determinant:", round(det, 3))
+print("Area scale factor:", round(abs(det), 3))
+
+inverse = np.linalg.inv(combined)
+restored = inverse @ transformed
+print("Restored coordinates:\n", np.round(restored, 3))
+print("Original recovered:", np.allclose(restored, points))
+     
+Transformation matrix (scale @ rotation):
+ [[ 0. -2.]
+ [ 1.  0.]]
+Transformed coordinates:
+ [[ 0.  0. -6. -6.]
+ [ 0.  4.  4.  0.]]
+Transpose of coordinates:
+ [[0 0]
+ [4 0]
+ [4 3]
+ [0 3]]
+(AB)^T equals B^T A^T: True
+Determinant: 2.0
+Area scale factor: 2.0
+Restored coordinates:
+ [[0. 4. 4. 0.]
+ [0. 0. 3. 3.]]
+Original recovered: True
+
+# Program 3: Determinant, inverse, and rank of an encryption matrix
+
+import numpy as np
+from math import gcd
+
+key = np.array([[3, 3],
+                [2, 7]])
+
+det = round(np.linalg.det(key))
+rank = np.linalg.matrix_rank(key)
+print("Encryption matrix:\n", key)
+print("Determinant:", det)
+print("Rank:", rank)
+
+inverse = np.linalg.inv(key)
+print("Inverse:\n", np.round(inverse, 4))
+
+modulus = 26
+det_mod = det % modulus
+suitable = (det != 0) and (gcd(det_mod, modulus) == 1)
+
+if suitable:
+    det_inverse = next(x for x in range(1, modulus) if (det_mod * x) % modulus == 1)
+    adjugate = np.array([[key[1][1], -key[0][1]],
+                         [-key[1][0], key[0][0]]])
+    inverse_mod = (det_inverse * adjugate) % modulus
+    print("Determinant mod 26:", det_mod)
+    print("Modular inverse of determinant:", det_inverse)
+    print("Inverse matrix mod 26:\n", inverse_mod)
+    print("Suitable for encryption: Yes")
+else:
+    print("Determinant mod 26:", det_mod)
+    print("Suitable for encryption: No")
+     
+Encryption matrix:
+ [[3 3]
+ [2 7]]
+Determinant: 15
+Rank: 2
+Inverse:
+ [[ 0.4667 -0.2   ]
+ [-0.1333  0.2   ]]
+Determinant mod 26: 15
+Modular inverse of determinant: 7
+Inverse matrix mod 26:
+ [[23  5]
+ [12 21]]
+Suitable for encryption: Yes
+
+# Program 4: Transition matrix with eigenvalues and eigenvectors for page ranking
+
+import numpy as np
+
+links = {
+    0: [1, 2],
+    1: [2],
+    2: [0],
+    3: [0, 2],
+}
+
+n = len(links)
+M = np.zeros((n, n))
+for page, outgoing in links.items():
+    for target in outgoing:
+        M[target][page] = 1 / len(outgoing)
+
+print("Transition matrix:\n", np.round(M, 3))
+
+eigenvalues, eigenvectors = np.linalg.eig(M)
+index = np.argmax(np.real(eigenvalues))
+dominant_value = np.real(eigenvalues[index])
+dominant_vector = np.real(eigenvectors[:, index])
+dominant_vector = dominant_vector / dominant_vector.sum()
+
+print("Eigenvalues:", np.round(np.real(eigenvalues), 4))
+print("Dominant eigenvalue:", round(dominant_value, 4))
+print("Dominant eigenvector (normalised):", np.round(dominant_vector, 4))
+
+ranking = np.argsort(-dominant_vector)
+print("Pages ranked by importance:")
+for position, page in enumerate(ranking, start=1):
+    print(position, "- Page", page, "score", round(dominant_vector[page], 4))
+     
+Transition matrix:
+ [[0.  0.  1.  0.5]
+ [0.5 0.  0.  0. ]
+ [0.5 1.  0.  0.5]
+ [0.  0.  0.  0. ]]
+Eigenvalues: [ 1.  -0.5 -0.5  0. ]
+Dominant eigenvalue: 1.0
+Dominant eigenvector (normalised): [ 0.4  0.2  0.4 -0. ]
+Pages ranked by importance:
+1 - Page 2 score 0.4
+2 - Page 0 score 0.4
+3 - Page 1 score 0.2
+4 - Page 3 score -0.0
+
+# Program 5: Dot product and cosine similarity for customer preferences
+
+import numpy as np
+
+customers = {
+    "Customer A": np.array([5, 0, 3, 0, 2]),
+    "Customer B": np.array([4, 0, 4, 0, 1]),
+    "Customer C": np.array([0, 5, 0, 4, 0]),
+    "Customer D": np.array([1, 0, 2, 0, 5]),
+}
+
+names = list(customers.keys())
+print("Preference vectors (electronics, books, clothing, sports, groceries):")
+for name in names:
+    print(name, customers[name])
+
+print("\nPairwise dot product and cosine similarity:")
+for i in range(len(names)):
+    for j in range(i + 1, len(names)):
+        a = customers[names[i]]
+        b = customers[names[j]]
+        dot = np.dot(a, b)
+        cosine = dot / (np.linalg.norm(a) * np.linalg.norm(b))
+        print(f"{names[i]} vs {names[j]}: dot = {dot}, cosine = {cosine:.4f}")
+
+best_pair = None
+best_score = -1
+for i in range(len(names)):
+    for j in range(i + 1, len(names)):
+        a = customers[names[i]]
+        b = customers[names[j]]
+        score = np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+        if score > best_score:
+            best_score = score
+            best_pair = (names[i], names[j])
+
+print(f"\nMost similar customers: {best_pair[0]} and {best_pair[1]} (cosine = {best_score:.4f})")
+     
+Preference vectors (electronics, books, clothing, sports, groceries):
+Customer A [5 0 3 0 2]
+Customer B [4 0 4 0 1]
+Customer C [0 5 0 4 0]
+Customer D [1 0 2 0 5]
+
+Pairwise dot product and cosine similarity:
+Customer A vs Customer B: dot = 34, cosine = 0.9601
+Customer A vs Customer C: dot = 0, cosine = 0.0000
+Customer A vs Customer D: dot = 21, cosine = 0.6220
+Customer B vs Customer C: dot = 0, cosine = 0.0000
+Customer B vs Customer D: dot = 17, cosine = 0.5403
+Customer C vs Customer D: dot = 0, cosine = 0.0000
+
+Most similar customers: Customer A and Customer B (cosine = 0.9601)
+
+# Program 6: Euclidean and Manhattan distance for customer grouping
+
+import numpy as np
+
+customers = {
+    "Customer A": np.array([120, 3, 450]),
+    "Customer B": np.array([110, 4, 430]),
+    "Customer C": np.array([30, 12, 90]),
+    "Customer D": np.array([35, 10, 110]),
+    "Customer E": np.array([200, 1, 900]),
+}
+
+names = list(customers.keys())
+print("Purchasing features (monthly spend, orders per month, items bought):")
+for name in names:
+    print(name, customers[name])
+
+print("\nPairwise distances:")
+for i in range(len(names)):
+    for j in range(i + 1, len(names)):
+        a = customers[names[i]]
+        b = customers[names[j]]
+        euclidean = np.sqrt(np.sum((a - b) ** 2))
+        manhattan = np.sum(np.abs(a - b))
+        print(f"{names[i]} vs {names[j]}: Euclidean = {euclidean:.2f}, Manhattan = {manhattan:.2f}")
+
+all_features = np.array(list(customers.values()))
+min_vals = all_features.min(axis=0)
+max_vals = all_features.max(axis=0)
+scaled = (all_features - min_vals) / (max_vals - min_vals)
+
+print("\nAfter min-max scaling, pairwise distances:")
+for i in range(len(names)):
+    for j in range(i + 1, len(names)):
+        euclidean = np.sqrt(np.sum((scaled[i] - scaled[j]) ** 2))
+        manhattan = np.sum(np.abs(scaled[i] - scaled[j]))
+        print(f"{names[i]} vs {names[j]}: Euclidean = {euclidean:.3f}, Manhattan = {manhattan:.3f}")
+
+raw_nearest = {}
+scaled_nearest = {}
+for i in range(len(names)):
+    raw_d = [(np.sqrt(np.sum((all_features[i] - all_features[j]) ** 2)), j) for j in range(len(names)) if j != i]
+    scaled_d = [(np.sqrt(np.sum((scaled[i] - scaled[j]) ** 2)), j) for j in range(len(names)) if j != i]
+    raw_nearest[names[i]] = names[min(raw_d)[1]]
+    scaled_nearest[names[i]] = names[min(scaled_d)[1]]
+
+print("\nNearest neighbour (raw Euclidean):", raw_nearest)
+print("Nearest neighbour (scaled Euclidean):", scaled_nearest)
+print("Metric choice: scaled Euclidean is preferred when features have different units,")
+print("because raw distances are dominated by the largest-valued feature.")
+     
+Purchasing features (monthly spend, orders per month, items bought):
+Customer A [120   3 450]
+Customer B [110   4 430]
+Customer C [30 12 90]
+Customer D [ 35  10 110]
+Customer E [200   1 900]
+
+Pairwise distances:
+Customer A vs Customer B: Euclidean = 22.38, Manhattan = 31.00
+Customer A vs Customer C: Euclidean = 371.19, Manhattan = 459.00
+Customer A vs Customer D: Euclidean = 350.53, Manhattan = 432.00
+Customer A vs Customer E: Euclidean = 457.06, Manhattan = 532.00
+Customer B vs Customer C: Euclidean = 349.38, Manhattan = 428.00
+Customer B vs Customer D: Euclidean = 328.73, Manhattan = 401.00
+Customer B vs Customer E: Euclidean = 478.55, Manhattan = 563.00
+Customer C vs Customer D: Euclidean = 20.71, Manhattan = 27.00
+Customer C vs Customer E: Euclidean = 827.72, Manhattan = 991.00
+Customer D vs Customer E: Euclidean = 807.10, Manhattan = 964.00
+
+After min-max scaling, pairwise distances:
+Customer A vs Customer B: Euclidean = 0.111, Manhattan = 0.174
+Customer A vs Customer C: Euclidean = 1.071, Manhattan = 1.792
+Customer A vs Customer D: Euclidean = 0.912, Manhattan = 1.556
+Customer A vs Customer E: Euclidean = 0.750, Manhattan = 1.208
+Customer B vs Customer C: Euclidean = 0.963, Manhattan = 1.618
+Customer B vs Customer D: Euclidean = 0.805, Manhattan = 1.382
+Customer B vs Customer E: Euclidean = 0.831, Manhattan = 1.382
+Customer C vs Customer D: Euclidean = 0.186, Manhattan = 0.236
+Customer C vs Customer E: Euclidean = 1.732, Manhattan = 3.000
+Customer D vs Customer E: Euclidean = 1.601, Manhattan = 2.764
+
+Nearest neighbour (raw Euclidean): {'Customer A': 'Customer B', 'Customer B': 'Customer A', 'Customer C': 'Customer D', 'Customer D': 'Customer C', 'Customer E': 'Customer A'}
+Nearest neighbour (scaled Euclidean): {'Customer A': 'Customer B', 'Customer B': 'Customer A', 'Customer C': 'Customer D', 'Customer D': 'Customer C', 'Customer E': 'Customer A'}
+Metric choice: scaled Euclidean is preferred when features have different units,
+because raw distances are dominated by the largest-valued feature.
+
+# Program 7: Mean, variance, and standard deviation of exam marks
+
+import numpy as np
+
+marks = np.array([72, 85, 64, 91, 78, 55, 88, 70, 81, 67])
+
+mean = np.mean(marks)
+variance = np.var(marks, ddof=1)
+std_dev = np.std(marks, ddof=1)
+
+print("Marks:", marks)
+print("Mean:", round(mean, 2))
+print("Variance (sample):", round(variance, 2))
+print("Standard deviation (sample):", round(std_dev, 2))
+
+cv = std_dev / mean * 100
+print("Coefficient of variation:", round(cv, 2), "%")
+
+if cv < 10:
+    consistency = "very consistent"
+elif cv < 20:
+    consistency = "moderately consistent"
+else:
+    consistency = "inconsistent"
+print("Consistency of performance:", consistency)
+     
+Marks: [72 85 64 91 78 55 88 70 81 67]
+Mean: 75.1
+Variance (sample): 132.1
+Standard deviation (sample): 11.49
+Coefficient of variation: 15.3 %
+Consistency of performance: moderately consistent
+
+# Program 8: Conditional probability for defective products from two machines
+
+machine_a_share = 0.60
+machine_b_share = 0.40
+
+defect_rate_a = 0.02
+defect_rate_b = 0.05
+
+p_defect = machine_a_share * defect_rate_a + machine_b_share * defect_rate_b
+print("Probability a random product is defective:", round(p_defect, 4))
+
+p_a_given_defect = (machine_a_share * defect_rate_a) / p_defect
+p_b_given_defect = (machine_b_share * defect_rate_b) / p_defect
+
+print("P(Machine A | defective):", round(p_a_given_defect, 4))
+print("P(Machine B | defective):", round(p_b_given_defect, 4))
+print("Sum check (should be 1):", round(p_a_given_defect + p_b_given_defect, 4))
+
+most_likely = "Machine A" if p_a_given_defect > p_b_given_defect else "Machine B"
+print("Most likely source of the defective product:", most_likely)
+     
+Probability a random product is defective: 0.032
+P(Machine A | defective): 0.375
+P(Machine B | defective): 0.625
+Sum check (should be 1): 1.0
+Most likely source of the defective product: Machine B
+
+# Program 9: Bayes' theorem for a diagnostic test
+
+prevalence = 0.01
+sensitivity = 0.95
+specificity = 0.90
+
+p_positive = sensitivity * prevalence + (1 - specificity) * (1 - prevalence)
+print("Probability of a positive test:", round(p_positive, 4))
+
+p_disease_given_positive = (sensitivity * prevalence) / p_positive
+print("P(Disease | positive test):", round(p_disease_given_positive, 4))
+print("Probability of disease given positive test (%):", round(p_disease_given_positive * 100, 2))
+
+p_disease_given_negative = ((1 - sensitivity) * prevalence) / (1 - p_positive)
+print("P(Disease | negative test):", round(p_disease_given_negative, 4))
+     
+Probability of a positive test: 0.1085
+P(Disease | positive test): 0.0876
+Probability of disease given positive test (%): 8.76
+P(Disease | negative test): 0.0006
+
+# Program 10: Random sampling and distribution checking for temperature observations
+
+import numpy as np
+from scipy import stats
+
+rng = np.random.default_rng(42)
+temperatures = rng.normal(loc=30, scale=3, size=500)
+
+print("Sample size:", len(temperatures))
+print("Sample mean:", round(np.mean(temperatures), 2))
+print("Sample standard deviation:", round(np.std(temperatures, ddof=1), 2))
+
+counts, bin_edges = np.histogram(temperatures, bins=10)
+probabilities = counts / counts.sum()
+print("\nEstimated probability distribution (histogram):")
+for i in range(len(probabilities)):
+    print(f"{bin_edges[i]:.1f} to {bin_edges[i+1]:.1f}: {probabilities[i]:.3f}")
+
+statistic, p_value = stats.kstest(temperatures, "norm", args=(30, 3))
+print("\nKolmogorov-Smirnov test against Normal(30, 3):")
+print("Statistic:", round(statistic, 4))
+print("p-value:", round(p_value, 4))
+
+if p_value > 0.05:
+    print("Conclusion: the observations are consistent with the expected distribution.")
+else:
+    print("Conclusion: the observations do not follow the expected distribution.")
+     
+Sample size: 500
+Sample mean: 29.96
+Sample standard deviation: 2.88
+
+Estimated probability distribution (histogram):
+22.3 to 23.9: 0.018
+23.9 to 25.6: 0.048
+25.6 to 27.2: 0.110
+27.2 to 28.9: 0.164
+28.9 to 30.5: 0.226
+30.5 to 32.2: 0.218
+32.2 to 33.8: 0.118
+33.8 to 35.5: 0.066
+35.5 to 37.1: 0.024
+37.1 to 38.7: 0.008
+
+Kolmogorov-Smirnov test against Normal(30, 3):
+Statistic: 0.0413
+p-value: 0.3501
+Conclusion: the observations are consistent with the expected distribution.
+
+# Program 11: Entropy for loan applicant classification
+
+import numpy as np
+from collections import Counter
+
+labels = ["low-risk", "high-risk", "low-risk", "low-risk", "high-risk",
+          "low-risk", "high-risk", "low-risk", "low-risk", "high-risk"]
+
+counts = Counter(labels)
+total = len(labels)
+
+entropy = 0.0
+print("Class distribution:")
+for label, count in counts.items():
+    p = count / total
+    entropy -= p * np.log2(p)
+    print(f"{label}: {count} of {total} (p = {p:.2f})")
+
+print("\nEntropy of applicant dataset:", round(entropy, 4), "bits")
+
+max_entropy = np.log2(len(counts))
+print("Maximum possible entropy for", len(counts), "classes:", round(max_entropy, 4), "bits")
+
+if entropy < 0.5:
+    interpretation = "low uncertainty: the classes are well separated"
+elif entropy < 0.9:
+    interpretation = "moderate uncertainty: the classes are somewhat mixed"
+else:
+    interpretation = "high uncertainty: the classes are almost evenly mixed"
+print("Interpretation:", interpretation)
+     
+Class distribution:
+low-risk: 6 of 10 (p = 0.60)
+high-risk: 4 of 10 (p = 0.40)
+
+Entropy of applicant dataset: 0.971 bits
+Maximum possible entropy for 2 classes: 1.0 bits
+Interpretation: high uncertainty: the classes are almost evenly mixed
+
+# Program 12: Cross-entropy loss for spam detection
+
+import numpy as np
+
+actual = np.array([1, 0, 1, 1, 0, 0, 1, 0])
+predicted = np.array([0.90, 0.20, 0.75, 0.40, 0.10, 0.65, 0.85, 0.05])
+
+eps = 1e-15
+predicted = np.clip(predicted, eps, 1 - eps)
+
+per_email_loss = -(actual * np.log(predicted) + (1 - actual) * np.log(1 - predicted))
+for i, (y, p, loss) in enumerate(zip(actual, predicted, per_email_loss), start=1):
+    print(f"Email {i}: actual = {y}, predicted = {p:.2f}, loss = {loss:.4f}")
+
+cross_entropy = np.mean(per_email_loss)
+print("\nAverage cross-entropy loss:", round(cross_entropy, 4))
+
+worst = np.argmax(per_email_loss)
+print("Largest error: Email", worst + 1, "with loss", round(per_email_loss[worst], 4))
+
+predicted_labels = (predicted >= 0.5).astype(int)
+accuracy = np.mean(predicted_labels == actual)
+print("Accuracy at threshold 0.5:", round(accuracy * 100, 2), "%")
+     
+Email 1: actual = 1, predicted = 0.90, loss = 0.1054
+Email 2: actual = 0, predicted = 0.20, loss = 0.2231
+Email 3: actual = 1, predicted = 0.75, loss = 0.2877
+Email 4: actual = 1, predicted = 0.40, loss = 0.9163
+Email 5: actual = 0, predicted = 0.10, loss = 0.1054
+Email 6: actual = 0, predicted = 0.65, loss = 1.0498
+Email 7: actual = 1, predicted = 0.85, loss = 0.1625
+Email 8: actual = 0, predicted = 0.05, loss = 0.0513
+
+Average cross-entropy loss: 0.3627
+Largest error: Email 6 with loss 1.0498
+Accuracy at threshold 0.5: 75.0 %
+
+# Program 13: KL divergence for speech recognition probabilities
+
+import numpy as np
+
+actual = np.array([0.70, 0.20, 0.10])
+predicted = np.array([0.50, 0.30, 0.20])
+
+eps = 1e-15
+actual = np.clip(actual, eps, 1)
+predicted = np.clip(predicted, eps, 1)
+
+kl_divergence = np.sum(actual * np.log2(actual / predicted))
+print("Actual distribution:", actual)
+print("Predicted distribution:", predicted)
+print("KL divergence D(actual || predicted):", round(kl_divergence, 4), "bits")
+
+reverse_kl = np.sum(predicted * np.log2(predicted / actual))
+print("Reverse KL divergence D(predicted || actual):", round(reverse_kl, 4), "bits")
+
+entropy_actual = -np.sum(actual * np.log2(actual))
+cross_entropy = -np.sum(actual * np.log2(predicted))
+print("Entropy of actual distribution:", round(entropy_actual, 4), "bits")
+print("Cross-entropy:", round(cross_entropy, 4), "bits")
+print("Check: cross-entropy - entropy =", round(cross_entropy - entropy_actual, 4))
+
+if kl_divergence < 0.1:
+    interpretation = "the predicted distribution is very close to the actual one"
+elif kl_divergence < 0.5:
+    interpretation = "the predicted distribution differs moderately from the actual one"
+else:
+    interpretation = "the predicted distribution differs substantially from the actual one"
+print("Interpretation:", interpretation)
+print("Information lost by using the predicted distribution:", round(kl_divergence, 4), "bits per symbol")
+     
+Actual distribution: [0.7 0.2 0.1]
+Predicted distribution: [0.5 0.3 0.2]
+KL divergence D(actual || predicted): 0.1228 bits
+Reverse KL divergence D(predicted || actual): 0.1328 bits
+Entropy of actual distribution: 1.1568 bits
+Cross-entropy: 1.2796 bits
+Check: cross-entropy - entropy = 0.1228
+Interpretation: the predicted distribution differs moderately from the actual one
+Information lost by using the predicted distribution: 0.1228 bits per symbol
+
+# Program 14: Gradient descent on a quadratic cost function
+
+import numpy as np
+
+def cost(w):
+    return (w - 3) ** 2 + 2
+
+def gradient(w):
+    return 2 * (w - 3)
+
+w = 0.0
+learning_rate = 0.1
+iterations = 25
+
+print(f"{'Iteration':>10} {'w':>10} {'Cost':>10} {'Gradient':>10}")
+for i in range(iterations + 1):
+    print(f"{i:>10} {w:>10.4f} {cost(w):>10.4f} {gradient(w):>10.4f}")
+    w = w - learning_rate * gradient(w)
+
+print("\nMinimum found at w =", round(w, 4))
+print("Minimum cost =", round(cost(w), 4))
+print("True minimum is at w = 3 with cost = 2")
+     
+ Iteration          w       Cost   Gradient
+         0     0.0000    11.0000    -6.0000
+         1     0.6000     7.7600    -4.8000
+         2     1.0800     5.6864    -3.8400
+         3     1.4640     4.3593    -3.0720
+         4     1.7712     3.5099    -2.4576
+         5     2.0170     2.9664    -1.9661
+         6     2.2136     2.6185    -1.5729
+         7     2.3709     2.3958    -1.2583
+         8     2.4967     2.2533    -1.0066
+         9     2.5973     2.1621    -0.8053
+        10     2.6779     2.1038    -0.6442
+        11     2.7423     2.0664    -0.5154
+        12     2.7938     2.0425    -0.4123
+        13     2.8351     2.0272    -0.3299
+        14     2.8681     2.0174    -0.2639
+        15     2.8944     2.0111    -0.2111
+        16     2.9156     2.0071    -0.1689
+        17     2.9324     2.0046    -0.1351
+        18     2.9460     2.0029    -0.1081
+        19     2.9568     2.0019    -0.0865
+        20     2.9654     2.0012    -0.0692
+        21     2.9723     2.0008    -0.0553
+        22     2.9779     2.0005    -0.0443
+        23     2.9823     2.0003    -0.0354
+        24     2.9858     2.0002    -0.0283
+        25     2.9887     2.0001    -0.0227
+
+Minimum found at w = 2.9909
+Minimum cost = 2.0001
+True minimum is at w = 3 with cost = 2
+
+# Program 15: Batch, stochastic, and mini-batch gradient descent comparison
+
+import numpy as np
+import time
+
+rng = np.random.default_rng(0)
+n = 1000
+X = np.column_stack([np.ones(n), rng.uniform(0, 10, n)])
+true_w = np.array([4.0, 2.5])
+y = X @ true_w + rng.normal(0, 1, n)
+
+def loss(w):
+    return np.mean((X @ w - y) ** 2)
+
+def gradient(w, Xb, yb):
+    return 2 * Xb.T @ (Xb @ w - yb) / len(yb)
+
+def run(method, learning_rate=0.01, epochs=20, batch_size=None):
+    w = np.zeros(2)
+    history = []
+    start = time.time()
+    for epoch in range(epochs):
+        if method == "batch":
+            w = w - learning_rate * gradient(w, X, y)
+        else:
+            order = rng.permutation(n)
+            size = 1 if method == "stochastic" else batch_size
+            for s in range(0, n, size):
+                idx = order[s:s + size]
+                w = w - learning_rate * gradient(w, X[idx], y[idx])
+        history.append(loss(w))
+    elapsed = time.time() - start
+    return w, history, elapsed
+
+results = {
+    "Batch": run("batch", learning_rate=0.01, epochs=20),
+    "Stochastic": run("stochastic", learning_rate=0.001, epochs=20),
+    "Mini-batch (32)": run("mini", learning_rate=0.01, epochs=20, batch_size=32),
+}
+
+print(f"{'Method':<18} {'w0':>8} {'w1':>8} {'Final loss':>12} {'Time (s)':>10}")
+for name, (w, history, elapsed) in results.items():
+    print(f"{name:<18} {w[0]:>8.3f} {w[1]:>8.3f} {history[-1]:>12.4f} {elapsed:>10.4f}")
+
+print("\nLoss after each epoch:")
+print(f"{'Epoch':>6} {'Batch':>12} {'Stochastic':>12} {'Mini-batch':>12}")
+for e in range(20):
+    print(f"{e + 1:>6} {results['Batch'][1][e]:>12.4f} "
+          f"{results['Stochastic'][1][e]:>12.4f} {results['Mini-batch (32)'][1][e]:>12.4f}")
+
+print("\nTrue parameters:", true_w)
+     
+Method                   w0       w1   Final loss   Time (s)
+Batch                 0.762    2.982       3.4893     0.0023
+Stochastic            4.015    2.585       1.3308     0.3622
+Mini-batch (32)       3.808    2.548       1.0766     0.0102
+
+Loss after each epoch:
+ Epoch        Batch   Stochastic   Mini-batch
+     1      31.6553       2.2186       3.3767
+     2       6.2253       1.5648       2.7192
+     3       4.0894       1.2883       2.3440
+     4       3.8883       1.2857       1.9847
+     5       3.8481       1.2167       1.7261
+     6       3.8215       1.0706       1.5707
+     7       3.7963       1.0954       1.4523
+     8       3.7713       1.0699       1.3319
+     9       3.7466       1.0545       1.4249
+    10       3.7222       1.0851       1.2171
+    11       3.6979       1.0529       1.1679
+    12       3.6739       1.1494       1.1622
+    13       3.6501       1.1474       1.3170
+    14       3.6265       1.1077       1.1046
+    15       3.6031       1.0531       1.0969
+    16       3.5799       1.1275       1.1310
+    17       3.5569       1.0630       1.1060
+    18       3.5342       1.0729       1.1867
+    19       3.5116       1.1387       1.1016
+    20       3.4893       1.3308       1.0766
+
+True parameters: [4.  2.5]
+
+# Program 16: Linear regression for house price prediction
+
+import numpy as np
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+rng = np.random.default_rng(1)
+n = 200
+area = rng.uniform(50, 200, n)
+bedrooms = rng.integers(1, 6, n)
+location_score = rng.integers(1, 6, n)
+price = 3000 * area + 15000 * bedrooms + 20000 * location_score + rng.normal(0, 20000, n)
+
+X = np.column_stack([area, bedrooms, location_score])
+y = price
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
+
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+print("Coefficients (area, bedrooms, location):", np.round(model.coef_, 2))
+print("Intercept:", round(model.intercept_, 2))
+
+y_pred = model.predict(X_test)
+print("\nFirst 5 predictions vs actual prices:")
+for p, a in zip(y_pred[:5], y_test[:5]):
+    print(f"Predicted: {p:,.0f}   Actual: {a:,.0f}")
+
+mae = mean_absolute_error(y_test, y_pred)
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+r2 = r2_score(y_test, y_pred)
+
+print("\nMean absolute error:", round(mae, 2))
+print("Root mean squared error:", round(rmse, 2))
+print("R-squared:", round(r2, 4))
+     
+Coefficients (area, bedrooms, location): [ 2944.14 16065.23 19060.99]
+Intercept: 8361.67
+
+First 5 predictions vs actual prices:
+Predicted: 609,923   Actual: 610,202
+Predicted: 582,294   Actual: 579,718
+Predicted: 525,671   Actual: 526,590
+Predicted: 682,097   Actual: 696,515
+Predicted: 268,379   Actual: 260,036
+
+Mean absolute error: 15113.46
+Root mean squared error: 19673.63
+R-squared: 0.9763
